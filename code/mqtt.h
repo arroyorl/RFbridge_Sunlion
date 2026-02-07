@@ -270,13 +270,17 @@ void mqtt_send(String subtopic, String message, bool retain){
 
 String topic = base_topic + "/" + subtopic;
 
-  DebugLn("mqtt_send, topic: " + topic + ", payload: " + message);
-  if(mqtt_reconnect() ) {
-    // send data to topic
-    client.publish(topic.c_str(), message.c_str(), retain);
-    Debug("mqtt send [" );
-    Debug(topic);
-    Debug("]: ");
-    DebugLn(message);
-  }
+  if (MQTTactive){
+    // MQTT is active send message
+    DebugLn("mqtt_send, topic: " + topic + ", payload: " + message);
+    if(mqtt_reconnect() ) {
+      // send data to topic
+      client.publish(topic.c_str(), message.c_str(), retain);
+      Debug("mqtt send [" );
+      Debug(topic);
+      Debug("]: ");
+      DebugLn(message);
+    }
+ }
+
 }

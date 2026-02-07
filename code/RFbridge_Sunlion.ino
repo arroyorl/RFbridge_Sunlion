@@ -32,7 +32,7 @@
 //
 //  3.0 parametrizable commands
 //      removed "toggle" commands and hard-coded commands
-//      created txData and rxData matrixs to store RX and TX commands
+//      created txData and rxData arrays to store RX and TX commands
 //      added http "rxdata", "txdata", "listdata", "rxclear" and "txclear" commnds (see mainPage.h)
 //      added "pulselength" to MQTT command base_topic/send with payload {"protocol": pp, "length": ll, "code": nnnnnn, "pulselength": xx}
 //
@@ -61,6 +61,8 @@
 //      receive commands and send status also via MQTT
 //
 //  5.1 added additional set mqtt simple commands (topic/set_light/code ON/OFF)
+//
+//  5.2 status messages sent only if MQTT is active
 // 
 ///////////////////////////////////////////////////////////////
 
@@ -92,7 +94,7 @@
 #include <ELECHOUSE_CC1101_SRC_DRV.h> // v 2.5.7
 #include <RCSwitch.h>  // V 2.6.4 (modified to add Sulion code as protocol 13)
 
-#define FVERSION  "v5.1"
+#define FVERSION  "v5.2"
 
 #define RDEBUG
 
@@ -120,6 +122,7 @@ int           ap_setup_done = 0;
 unsigned int  count = 0;
 String        ipaddress;
 bool          WiFiconnected;
+bool          MQTTactive;
 bool          RXmode = false;
 bool          TXmode = false;
 
@@ -369,6 +372,7 @@ void setup() {
     DebugLn("continue without WiFi ....");
   }
 
+  MQTTactive = false;   // send MQTT not active by default
   if (WiFiconnected) {
     // ********** initialize OTA *******************
     ArduinoOTA.begin();
@@ -376,6 +380,7 @@ void setup() {
     // ********* initialize MQTT ******************
     if (strlen(settings.data.mqttbroker) > 0 ) {
       // MQTT broker defined, initialize MQTT
+      MQTTactive = true;
       mqtt_init();
       delay(100);
       mqtt_send("ipaddress",ipaddress,false);
